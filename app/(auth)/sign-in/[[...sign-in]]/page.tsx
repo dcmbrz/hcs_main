@@ -1,0 +1,20 @@
+import { SignIn } from '@clerk/nextjs'
+
+export default function Page() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <h1 className="text-3xl font-bold text-blue-700 mb-8">
+        Ekwuety Health
+      </h1>
+      <SignIn 
+        appearance={{
+          elements: {
+            rootBox: "mx-auto",
+            card: "shadow-xl"
+          }
+        }}
+        afterSignInUrl="/dashboard"
+      />
+    </div>
+  )
+}
