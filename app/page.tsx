@@ -1,3 +1,4 @@
+import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,13 +25,17 @@ export default async function Home() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           {userId ? (
+            <>
             <Link 
               href="/dashboard"
               className="px-8 py-3 bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-800 transition"
             >
               Go to Dashboard
             </Link>
+            <UserButton/>
+            </>
           ) : (
+            
             <>
               <Link 
                 href="/sign-up"
@@ -38,7 +43,7 @@ export default async function Home() {
               >
                 Get Started
               </Link>
-              
+
               <Link 
                 href="/sign-in"
                 className="px-8 py-3 border-2 border-blue-700 text-blue-700 rounded-lg font-semibold underline hover:bg-blue-50 transition"
