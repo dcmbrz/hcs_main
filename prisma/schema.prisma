@@ -1,0 +1,714 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum JOBTYPE {
+  FULL
+  PART
+  CONTRACT
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  CONSULTATION
+  FOLLOW_UP
+  EMERGENCY
+  ROUTINE_CHECKUP
+  SURGERY
+  THERAPY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  INSURANCE
+  MOBILE_MONEY
+}
+
+enum NurseType {
+  REGISTERED_NURSE
+  LICENSED_PRACTICAL_NURSE
+  CERTIFIED_NURSING_ASSISTANT
+  HOME_HEALTH_AIDE
+}
+
+enum ShiftType {
+  DAY
+  NIGHT
+  EVENING
+  ROTATING
+}
+
+enum ResidentStatus {
+  ACTIVE
+  DISCHARGED
+  HOSPITALIZED
+  DECEASED
+}
+
+enum CareLevel {
+  INDEPENDENT
+  ASSISTED
+  SKILLED_NURSING
+  MEMORY_CARE
+  HOSPICE
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum TaskType {
+  MEDICATION
+  VITAL_SIGNS
+  BATHING
+  FEEDING
+  MOBILITY_ASSISTANCE
+  WOUND_CARE
+  PHYSICAL_THERAPY
+  MENTAL_HEALTH_CHECK
+  EMERGENCY
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Models
+model Patient {
+  id                      String    @id @default(cuid())
+  clerkUserId             String    @unique
+  
+  // Personal Information
+  first_name              String
+  last_name               String
+  date_of_birth           DateTime
+  gender                  Gender    
+  phone                   String    
+  email                   String    @unique
+  marital_status          String
+  address                 String
+  img                     String?
+  
+  // Emergency Contact
+  emergency_contact_name  String
+  emergency_contact_number String
+  relation                String
+  
+  // Medical Information
+  blood_group             String?
+  allergies               String?
+  medical_conditions      String?
+  medical_history         String?
+  
+  // Insurance
+  insurance_provider      String?
+  insurance_number        String?
+  
+  // Consents
+  privacy_consent         Boolean   @default(false)
+  service_consent         Boolean   @default(false)
+  medical_consent         Boolean   @default(false)
+  
+  // Relations
+  appointments            Appointment[]
+  medicalRecords          MedicalRecords[]
+  payments                Payment[]
+  ratings                 Rating[]
+  diagnoses               Diagnosis[]
+  
+  // Timestamps
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([email])
+  @@index([clerkUserId])
+  @@index([created_at])
+}
+
+model Doctor {
+  id                      String        @id @default(cuid())
+  email                   String        @unique
+  name                    String
+  specialization          String
+  license_number          String        @unique
+  phone                   String
+  address                 String
+  department              String?
+  img                     String?
+  availability_status     String?
+  type                    JOBTYPE       @default(FULL)
+  
+  // Relations
+  working_days            WorkingDays[]
+  appointments            Appointment[]
+  ratings                 Rating[]
+  diagnosis               Diagnosis[]
+  
+  // Timestamps
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  
+  @@index([email])
+  @@index([specialization])
+  @@index([department])
+}
+
+model WorkingDays {
+  id                      String    @id @default(cuid())
+  doctorId                String
+  doctor                  Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  day_of_week             String    // e.g., "Monday", "Tuesday"
+  start_time              String    // e.g., "09:00"
+  end_time                String    // e.g., "17:00"
+  is_available            Boolean   @default(true)
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([doctorId])
+  @@index([day_of_week])
+}
+
+model Appointment {
+  id                      String              @id @default(cuid())
+  
+  // Patient & Doctor
+  patientId               String
+  patient                 Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  doctorId                String
+  doctor                  Doctor              @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  // Appointment Details
+  appointment_date        DateTime
+  appointment_time        String
+  type                    AppointmentType     @default(CONSULTATION)
+  status                  AppointmentStatus   @default(SCHEDULED)
+  reason                  String
+  notes                   String?
+  
+  // Duration (in minutes)
+  duration                Int                 @default(30)
+  
+  // Relations
+  diagnosis               Diagnosis[]
+  payment                 Payment?
+  
+  // Timestamps
+  created_at              DateTime            @default(now())
+  updated_at              DateTime            @updatedAt
+  
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([appointment_date])
+  @@index([status])
+}
+
+model Diagnosis {
+  id                      String        @id @default(cuid())
+  
+  // Patient & Doctor
+  patientId               String
+  patient                 Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  doctorId                String
+  doctor                  Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  appointmentId           String?
+  appointment             Appointment?  @relation(fields: [appointmentId], references: [id])
+  
+  // Diagnosis Details
+  diagnosis               String
+  symptoms                String
+  treatment_plan          String
+  prescription            String?
+  lab_results             String?
+  notes                   String?
+  
+  // Vital Signs
+  blood_pressure          String?
+  temperature             String?
+  heart_rate              String?
+  weight                  String?
+  height                  String?
+  
+  // Follow-up
+  follow_up_date          DateTime?
+  
+  // Timestamps
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([appointmentId])
+  @@index([created_at])
+}
+
+model MedicalRecords {
+  id                      String    @id @default(cuid())
+  
+  // Patient
+  patientId               String
+  patient                 Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  // Record Details
+  record_type             String    // e.g., "Lab Report", "X-Ray", "Prescription"
+  title                   String
+  description             String?
+  file_url                String?   // Link to uploaded document
+  
+  // Timestamps
+  record_date             DateTime  @default(now())
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([patientId])
+  @@index([record_type])
+  @@index([record_date])
+}
+
+model Payment {
+  id                      String        @id @default(cuid())
+  
+  // Patient
+  patientId               String
+  patient                 Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  // Appointment (optional)
+  appointmentId           String?       @unique
+  appointment             Appointment?  @relation(fields: [appointmentId], references: [id])
+  
+  // Payment Details
+  amount                  Float
+  payment_method          PaymentMethod
+  status                  PaymentStatus @default(PENDING)
+  transaction_id          String?       @unique
+  
+  // Description
+  description             String
+  notes                   String?
+  
+  // Timestamps
+  payment_date            DateTime      @default(now())
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  
+  @@index([patientId])
+  @@index([appointmentId])
+  @@index([status])
+  @@index([payment_date])
+}
+
+model Rating {
+  id                      String    @id @default(cuid())
+  
+  // Patient & Doctor
+  patientId               String
+  patient                 Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  doctorId                String
+  doctor                  Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  // Rating Details
+  rating                  Int       // 1-5 stars
+  review                  String?
+  
+  // Timestamps
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@unique([patientId, doctorId])
+  @@index([doctorId])
+  @@index([rating])
+}
+
+// ========== NURSE AND RESIDENT MODELS ==========
+
+model Nurse {
+  id                      String        @id @default(cuid())
+  clerkUserId             String?       @unique
+  
+  // Personal Information
+  first_name              String
+  last_name               String
+  email                   String        @unique
+  phone                   String
+  address                 String
+  img                     String?
+  date_of_birth           DateTime
+  
+  // Professional Information
+  nurse_type              NurseType
+  license_number          String        @unique
+  specialization          String?
+  years_of_experience     Int
+  qualification           String
+  certifications          String?
+  
+  // Employment Details
+  employment_type         JOBTYPE       @default(FULL)
+  department              String?
+  shift_type              ShiftType
+  hourly_rate             Float?
+  is_active               Boolean       @default(true)
+  
+  // Emergency Contact
+  emergency_contact_name  String
+  emergency_contact_phone String
+  
+  // Relations
+  shifts                  NurseShift[]
+  assigned_residents      ResidentNurseAssignment[]
+  care_tasks              CareTask[]
+  vital_records           VitalSignRecord[]
+  medication_logs         MedicationLog[]
+  incidents               IncidentReport[]
+  notes                   NurseNote[]
+  
+  // Timestamps
+  hire_date               DateTime      @default(now())
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  
+  @@index([email])
+  @@index([nurse_type])
+  @@index([is_active])
+  @@index([shift_type])
+}
+
+model Resident {
+  id                      String        @id @default(cuid())
+  
+  // Personal Information
+  first_name              String
+  last_name               String
+  date_of_birth           DateTime
+  gender                  Gender
+  phone                   String?
+  email                   String?       @unique
+  address_before_admission String
+  img                     String?
+  
+  // Medical Information
+  blood_group             String?
+  allergies               String?
+  medical_conditions      String
+  medical_history         String?
+  current_medications     String?
+  dietary_restrictions    String?
+  mobility_status         String?
+  mental_status           String?
+  
+  // Care Details
+  care_level              CareLevel
+  status                  ResidentStatus @default(ACTIVE)
+  room_number             String
+  admission_date          DateTime      @default(now())
+  discharge_date          DateTime?
+  
+  // Emergency Contact
+  emergency_contact_name  String
+  emergency_contact_phone String
+  emergency_contact_relation String
+  
+  // Insurance & Financial
+  insurance_provider      String?
+  insurance_number        String?
+  payment_method          String?
+  
+  // Family/Guardian
+  guardian_name           String?
+  guardian_phone          String?
+  guardian_relation       String?
+  
+  // Relations
+  assigned_nurses         ResidentNurseAssignment[]
+  care_tasks              CareTask[]
+  vital_records           VitalSignRecord[]
+  medication_logs         MedicationLog[]
+  incidents               IncidentReport[]
+  care_plans              CarePlan[]
+  notes                   NurseNote[]
+  
+  // Timestamps
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  
+  @@index([status])
+  @@index([care_level])
+  @@index([room_number])
+  @@index([admission_date])
+}
+
+model ResidentNurseAssignment {
+  id                      String    @id @default(cuid())
+  
+  nurseId                 String
+  nurse                   Nurse     @relation(fields: [nurseId], references: [id], onDelete: Cascade)
+  
+  residentId              String
+  resident                Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  // Assignment Details
+  is_primary_nurse        Boolean   @default(false)
+  assigned_date           DateTime  @default(now())
+  unassigned_date         DateTime?
+  notes                   String?
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@unique([nurseId, residentId])
+  @@index([nurseId])
+  @@index([residentId])
+  @@index([is_primary_nurse])
+}
+
+model NurseShift {
+  id                      String    @id @default(cuid())
+  
+  nurseId                 String
+  nurse                   Nurse     @relation(fields: [nurseId], references: [id], onDelete: Cascade)
+  
+  // Shift Details
+  shift_date              DateTime
+  shift_type              ShiftType
+  start_time              String
+  end_time                String
+  
+  // Clock in/out
+  clock_in_time           DateTime?
+  clock_out_time          DateTime?
+  
+  // Break time (in minutes)
+  break_duration          Int       @default(30)
+  
+  notes                   String?
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([nurseId])
+  @@index([shift_date])
+  @@index([shift_type])
+}
+
+model CareTask {
+  id                      String      @id @default(cuid())
+  
+  residentId              String
+  resident                Resident    @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  assignedNurseId         String?
+  assigned_nurse          Nurse?      @relation(fields: [assignedNurseId], references: [id])
+  
+  // Task Details
+  task_type               TaskType
+  title                   String
+  description             String
+  priority                String
+  status                  TaskStatus  @default(PENDING)
+  
+  // Scheduling
+  scheduled_time          DateTime
+  completed_time          DateTime?
+  
+  // Notes
+  completion_notes        String?
+  
+  created_at              DateTime    @default(now())
+  updated_at              DateTime    @updatedAt
+  
+  @@index([residentId])
+  @@index([assignedNurseId])
+  @@index([status])
+  @@index([scheduled_time])
+  @@index([task_type])
+}
+
+model VitalSignRecord {
+  id                      String    @id @default(cuid())
+  
+  residentId              String
+  resident                Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  recordedByNurseId       String
+  recorded_by_nurse       Nurse     @relation(fields: [recordedByNurseId], references: [id])
+  
+  // Vital Signs
+  blood_pressure_systolic Int?
+  blood_pressure_diastolic Int?
+  heart_rate              Int?
+  temperature             Float?
+  respiratory_rate        Int?
+  oxygen_saturation       Int?
+  blood_glucose           Float?
+  weight                  Float?
+  
+  notes                   String?
+  
+  recorded_at             DateTime  @default(now())
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([residentId])
+  @@index([recordedByNurseId])
+  @@index([recorded_at])
+}
+
+model MedicationLog {
+  id                      String    @id @default(cuid())
+  
+  residentId              String
+  resident                Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  administeredByNurseId   String
+  administered_by_nurse   Nurse     @relation(fields: [administeredByNurseId], references: [id])
+  
+  // Medication Details
+  medication_name         String
+  dosage                  String
+  route                   String
+  frequency               String
+  
+  // Administration
+  scheduled_time          DateTime
+  administered_time       DateTime?
+  was_administered        Boolean   @default(false)
+  
+  // Notes
+  reason_if_not_given     String?
+  side_effects_observed   String?
+  notes                   String?
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([residentId])
+  @@index([administeredByNurseId])
+  @@index([scheduled_time])
+  @@index([was_administered])
+}
+
+model CarePlan {
+  id                      String    @id @default(cuid())
+  
+  residentId              String
+  resident                Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  // Care Plan Details
+  title                   String
+  goals                   String
+  interventions           String
+  evaluation_criteria     String
+  
+  // Dates
+  start_date              DateTime  @default(now())
+  review_date             DateTime?
+  end_date                DateTime?
+  
+  is_active               Boolean   @default(true)
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([residentId])
+  @@index([is_active])
+  @@index([start_date])
+}
+
+model IncidentReport {
+  id                      String            @id @default(cuid())
+  
+  residentId              String
+  resident                Resident          @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  reportedByNurseId       String
+  reported_by_nurse       Nurse             @relation(fields: [reportedByNurseId], references: [id])
+  
+  // Incident Details
+  incident_type           String
+  severity                IncidentSeverity
+  description             String
+  location                String
+  
+  // Response
+  action_taken            String
+  follow_up_required      Boolean           @default(false)
+  follow_up_notes         String?
+  
+  // Notifications
+  family_notified         Boolean           @default(false)
+  doctor_notified         Boolean           @default(false)
+  
+  incident_time           DateTime
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+  
+  @@index([residentId])
+  @@index([reportedByNurseId])
+  @@index([severity])
+  @@index([incident_time])
+}
+
+model NurseNote {
+  id                      String    @id @default(cuid())
+  
+  residentId              String
+  resident                Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  
+  nurseId                 String
+  nurse                   Nurse     @relation(fields: [nurseId], references: [id])
+  
+  // Note Details
+  note_type               String
+  content                 String
+  is_confidential         Boolean   @default(false)
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@index([residentId])
+  @@index([nurseId])
+  @@index([note_type])
+  @@index([created_at])
+}
