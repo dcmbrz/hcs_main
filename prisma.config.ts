@@ -14,12 +14,7 @@ export default defineConfig({
   migrations: {
     path: "./prisma/migrations",
   },
-  // datasource is configured inside `prisma/schema.prisma`. Avoid reading
-  // environment variables here because the Prisma CLI may import this
-  // config before loading `.env`, which can cause "Missing required
-  // environment variable" errors. Let the schema file handle the
-  // environment variables here because the Prisma CLI may import this
-  // config before loading `.env`, which can cause "Missing required
-  // environment variable" errors. Let the schema file handle the
-  // datasource URL.
+  datasource: {
+    url: process.env.DATABASE_URL || "",
+  },
 });
