@@ -1,3 +1,6 @@
+// Load environment variables early
+import 'dotenv/config';
+
 // Import Prisma Client
 import { PrismaClient } from "@prisma/client";
 
