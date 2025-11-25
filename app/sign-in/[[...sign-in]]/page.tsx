@@ -13,7 +13,7 @@ export default function Page() {
             card: "shadow-xl"
           }
         }}
-        afterSignInUrl="/dashboard"
+        afterSignInUrl="/"
       />
     </div>
   )

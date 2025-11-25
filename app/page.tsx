@@ -30,12 +30,11 @@ export default async function Home() {
             risk assessment, and personalized care recommendations.
           </p>
         </div>
-
+      
         <div className="flex flex-col sm:flex-row gap-4 mt-8 items-center">
           {userId ? (
             <>
-              <Link 
-                href={`/${role}`}
+              <Link href={`/${role}`}
                 className="px-8 py-3 bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-800 transition shadow-lg"
               >
                 View Dashboard
@@ -64,3 +63,4 @@ export default async function Home() {
     </div>
   );
 }
+
