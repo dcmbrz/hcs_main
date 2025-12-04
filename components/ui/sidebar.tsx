@@ -2,6 +2,7 @@ import { getRole } from "@/utils/roles";
 import { Bell, CalendarCheck, Layout, LayoutDashboard, List, ListOrdered, Logs, LucideIcon, Pill, Receipt, Settings, SquareActivity, User, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { LogoutButton } from "./logout-button";
 
 const ACCESS_LEVELS_ALL = ["patient", "doctor", "nurse", "admin"];
 
@@ -147,15 +148,17 @@ export const Sidebar = async () => {
     })).filter(section => section.links.length > 0);
 
     return (
-        <aside className="w-64 bg-blue-900 text-white min-h-screen sticky top-0">
+        <aside className="flex flex-col w-64 bg-blue-900 text-white min-h-screen sticky top-0">
             {/* Logo/Header */}
             <div className="p-6">
-                <h2 className="text-2xl font-bold">Ekwuety Health</h2>
-                <p className="text-sm text-blue-200 capitalize">{role} Portal</p>
+                <Link href={"/"}>
+                    <h2 className="text-2xl font-bold" >Ekwuety Health Records</h2>
+                    <p className="text-sm text-blue-200 capitalize">{role} Portal</p>
+                </Link>
             </div>
 
             {/* Navigation */}
-            <nav className="px-3">
+            <nav className="px-3 flex-1">
                 {filteredSections.map((section, sectionIdx) => (
                     <div key={sectionIdx} className="mb-6">
                         <h3 className="px-3 mb-2 text-xs font-semibold text-blue-300 uppercase tracking-wider">
@@ -169,13 +172,15 @@ export const Sidebar = async () => {
                                     className="flex items-center gap-3 px-3 py-2 rounded-lg text-blue-100 hover:bg-blue-800 hover:text-white transition-colors group"
                                 >
                                     <SidebarIcon Icon={link.icon} />
-                                    <span className="text-sm font-medium">{link.name}</span>
+                                    <span className="hidden lg:block">{link.name}</span>
                                 </Link>
                             ))}
                         </div>
                     </div>
                 ))}
             </nav>
+            <LogoutButton/>
         </aside>
+        
     );
 };
