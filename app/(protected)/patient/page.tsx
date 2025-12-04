@@ -2,6 +2,9 @@ import { UserButton } from "@clerk/nextjs";
 import { getRole } from "@/utils/roles";
 import { Bell } from "lucide-react";
 
+
+
+
 export default async function PatientPage() {
   const role = await getRole();
 
