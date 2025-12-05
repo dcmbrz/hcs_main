@@ -9,11 +9,12 @@ export default async function PatientPage() {
   const role = await getRole();
   
   const user = await currentUser();
+  const data = null;
   
   // Check if patient data exists in database
-  const data = await db.patient.findUnique({
-    where: { clerkUserId: user?.id }
-  });
+  //const data = await db.patient.findUnique({
+    //where: { clerkUserId: user?.id }
+  //});
   
   // Redirect to registration if user exists but no patient data
   if (user && !data) {

@@ -8,7 +8,8 @@ export const PatientSchema = z.object({
   .string()
   .min(1, "Last name is required"),
   date_of_birth: z
-  .coerce.date()
+  .coerce
+  .date()
   .min(1, "Date of birth is required"),
   clerkUserId: z
   .string()
