@@ -1,21 +1,18 @@
-// Load environment variables early
-import 'dotenv/config';
-
 // Import Prisma Client
 import { PrismaClient } from "@prisma/client";
 
 // Create singleton function
-const prismaClientSingleton = () => {
-  return new PrismaClient();
-};
+//const prismaClientSingleton = () => {
+  //return new PrismaClient();
+//};
 
 // TypeScript type definition
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+  prismaGlobal: PrismaClient | undefined;
 } & typeof global;
 
 // The actual client instance
-const db = globalThis.prismaGlobal ?? prismaClientSingleton();
+const db = globalThis.prismaGlobal ?? new PrismaClient();
 
 // Export for use in your app
 export default db;
