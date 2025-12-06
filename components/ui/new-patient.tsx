@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Patient } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import { Form } from "./form";
 import { useForm } from "react-hook-form";
