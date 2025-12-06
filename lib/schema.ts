@@ -11,9 +11,6 @@ export const PatientSchema = z.object({
   .coerce
   .date()
   .min(1, "Date of birth is required"),
-  clerkUserId: z
-  .string()
-  .min(1, "Clerk User ID is required"),
   email: z
   .string()
   .email("Invalid email address"),

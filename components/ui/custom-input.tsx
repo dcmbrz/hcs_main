@@ -2,16 +2,14 @@ import React from "react";
 import { Control } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormLabel } from "./form";
 import { Input } from "./input";
-import { Select, SelectContent, SelectItem, SelectValue } from "./select";
-import { SelectTrigger } from "@radix-ui/react-select";
-
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "./select"
 interface CustomInputProps {
     type: "input" | "select" | "switch" | "radio" | "textarea";
     control: Control<any>;
     name: string;
     label?: string;
     placeholder?: string;
-    inputTypes?: "text" | "email" | "email" | "password";
+    inputType?: "text" | "email" | "password" | "date" | "number";
     selectList?: { label: string; value: string }[];
     defaultValue?: string | boolean;
 }
@@ -21,7 +19,7 @@ const RenderInput = ({ field, props}: {field: any; props: CustomInputProps}) => 
             return (
                 <FormControl>
                     <Input 
-                    type={props.inputTypes} 
+                    type={props.inputType} 
                     placeholder={props.placeholder} 
                     {...field} 
                     />
@@ -54,14 +52,14 @@ export const CustomInput = (props: CustomInputProps) => {
         <FormField
         control={control}
         name={name}
-        render={({ field }) => <FormItem className="w-full">
-            {type !=="radio" && type !=="checkbox" && (
-            <FormLabel>{label}</FormLabel>
+        render={({ field }) => (
+            <FormItem className="w-full">
+                {type !=="radio" && type !== "checkbox" && (
+                    <FormLabel>{label}</FormLabel>
             )}
-            <RenderInput field={field}
-
+            <RenderInput field={field} props={props} /> {}
             </FormItem>
-        }
+    )}
         />
     );
-}
+};
