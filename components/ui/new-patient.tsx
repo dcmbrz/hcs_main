@@ -13,6 +13,7 @@ import { PatientSchema } from "@/lib/schema";
 import { z } from "zod";
 import { CustomInput } from "./custom-input";
 import { GENDER, MARITAL_STATUS, RELATIONSHIP } from "@/lib";
+import { Button } from "./button";
 
 
 interface DataProps {
@@ -40,8 +41,13 @@ export const NewPatient = ({ data, type }: DataProps) => {
         defaultValues: { userData },
     });
 
+    const onSubmit: SubmitHandler<z.infer<typeof PatientSchema>> = async (values) => {
+        console.log(values);
+    }
+    {/* Card Container Logic */}
     return (
-        <Card className="max-w-6xl w-full p-4">
+        
+        <Card className="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 mx-auto">
             <CardHeader>
                 <CardTitle>Patient Registration</CardTitle>
                 <CardDescription>
@@ -52,7 +58,7 @@ export const NewPatient = ({ data, type }: DataProps) => {
             
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={() => {}} className="space-y-8 mt-5 w-full">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-5 w-full">
                         {/* Personal Information Section */}
                         <div className="space-y-6">
                             <h3 className="text-lg font-semibold">Personal Information</h3>
@@ -237,6 +243,13 @@ export const NewPatient = ({ data, type }: DataProps) => {
                                 />
                             </div>
                         )}
+                        <Button
+                            disabled={loading}
+                            type="Submit"
+                            className="w-full md:w-fit px-6"
+                            >
+                            {type === "create" ? "Submit" : "Update"}
+                        </Button>
                     </form>
                 </Form>
             </CardContent>
