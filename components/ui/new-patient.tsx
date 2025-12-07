@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { Patient } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -27,23 +27,87 @@ export const NewPatient = ({ data, type }: DataProps) => {
     const [imageURL, setImageURL] = useState<any>();    //<string>(data?.profileImage || "");
     const router = useRouter();
 
-    const userData = {
-        first_name: data?.first_name || "",
-        last_name: data?.last_name || "",
-        date_of_birth: data?.date_of_birth || "",
-        clerkUserId: user.user?.id,
-        email: user.user?.emailAddresses[0]?.emailAddress || "",
-        Phone_number: data?.Phone_number || "",
-    };
+    const userData = useMemo(() => ({
+    first_name: data?.first_name || "",
+    last_name: data?.last_name || "",
+    date_of_birth: data?.date_of_birth || "",
+    clerkUserId: user.user?.id,
+    email: user.user?.emailAddresses[0]?.emailAddress || "",
+    Phone_number: data?.Phone_number || "",
+}), [data, user.user]);
+
     
     const form = useForm<z.infer<typeof PatientSchema>>({
         resolver: zodResolver(PatientSchema),
-        defaultValues: { userData },
+        defaultValues: { 
+            ...userData,
+            address: data?.address || "",
+            date_of_birth: new Date(),
+            gender: "",
+            marital_status: "",
+            emergency_contact_name: "",
+            emergency_contact_phone: "",
+            emergency_contact_relationship: "",
+            blood_type: " ",
+            allergies: data?.allergies || "",
+            existing_conditions: "",
+            medical_history: "",
+            insurance_provider: "",
+            insurance_policy_number: "",
+            medical_consent: data?.medical_consent || false,
+            privacy_consent: data?.privacy_consent || false,
+            service_consent: data?.service_consent || false,
+             },
     });
 
     const onSubmit: SubmitHandler<z.infer<typeof PatientSchema>> = async (values) => {
         console.log(values);
-    }
+    };
+
+    useEffect(() => {
+        if (type === "create") {
+            userData && form.reset({...userData});
+        } else if (type === "update") {
+            data && 
+                form.reset({ 
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    email: data.email,
+                    phone: data.Phone_number,
+                    date_of_birth: new Date(data.date_of_birth),
+                    gender: data.gender,
+                    marital_status: data.marital_status as
+                        | "Single"
+                        | "Married"
+                        | "Divorced"
+                        | "Widowed"
+                        | "Separated",
+                    address: data.address,
+                    emergency_contact_name: data.emergency_contact_name,
+                    emergency_contact_relationship: data.emergency_contact_relationship as
+                        | "Mother"
+                        | "Father"
+                        | "Sibling"
+                        | "Spouse"
+                        | "Friend"
+                        | "Other",
+                    emergency_contact_phone: data.emergency_contact_number,
+                    blood_type: data?.blood_type!,
+                    allergies: data?.allergies! || "",
+                    existing_conditions: data?.existing_conditions! || "",
+                    medical_history: data?.medical_history! || "",
+                    insurance_provider: data?.insurance_provider! || "",
+                    insurance_policy_number: data?.insurance_policy_number! || "",
+                    medical_consent: data?.medical_consent,
+                    privacy_consent: data?.privacy_consent,
+                    service_consent: data?.service_consent,
+                 });
+        }
+    },
+    [type, data]);
+
+
+
     {/* Card Container Logic */}
     return (
         
