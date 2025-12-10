@@ -120,7 +120,7 @@ model Patient {
   last_name               String
   date_of_birth           DateTime
   gender                  Gender    
-  phone                   String    
+  Phone_number            String    
   email                   String    @unique
   marital_status          String
   address                 String

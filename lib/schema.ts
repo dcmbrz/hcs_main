@@ -42,7 +42,7 @@ export const PatientSchema = z.object({
   .string(),
   emergency_contact_phone: z
   .string(),
-  relation: z
+  emergency_contact_relationship: z
   .enum(["mother", "father", "sibling", "spouse", "friend", "other"]),
 
   blood_type: z

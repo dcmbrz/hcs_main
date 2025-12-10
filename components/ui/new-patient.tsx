@@ -6,7 +6,6 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import { Form } from "./form";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone } from "lucide-react";
 import { PatientSchema } from "@/lib/schema";
@@ -14,6 +13,9 @@ import { z } from "zod";
 import { CustomInput } from "./custom-input";
 import { GENDER, MARITAL_STATUS, RELATIONSHIP } from "@/lib";
 import { Button } from "./button";
+import { toast } from "sonner";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { createPatient } from "@/app/actions/patient";
 
 
 interface DataProps {
@@ -36,7 +38,7 @@ export const NewPatient = ({ data, type }: DataProps) => {
     Phone_number: data?.Phone_number || "",
 }), [data, user.user]);
 
-    
+    const userid = user?.id;
     const form = useForm<z.infer<typeof PatientSchema>>({
         resolver: zodResolver(PatientSchema),
         defaultValues: { 
@@ -60,8 +62,29 @@ export const NewPatient = ({ data, type }: DataProps) => {
              },
     });
 
-    const onSubmit: SubmitHandler<z.infer<typeof PatientSchema>> = async (values) => {
-        console.log(values);
+        const onSubmit: SubmitHandler<z.infer<typeof PatientSchema>> = async (values) => {
+        setLoading(true);
+        
+        try {
+            const res = type === "create" 
+                ? await createPatient(values, user.user?.id!)
+                : null; 
+            
+            setLoading(false);
+
+            if (res?.success) {
+                toast.success(res.msg);
+                form.reset();
+                router.push("/");
+            } else {
+                console.log(res);
+                toast.error(res?.msg || "Something went wrong. Please try again.");
+            }
+        } catch (error) {
+            setLoading(false);
+            console.error(error);
+            toast.error("An unexpected error occurred.");
+        }
     };
 
     useEffect(() => {
