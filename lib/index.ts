@@ -1,6 +1,6 @@
 export const GENDER = [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
+    { label: "MALE", value: "MALE" },
+    { label: "FEMALE", value: "FEMALE" },
 ]; 
 
 export const MARITAL_STATUS = [

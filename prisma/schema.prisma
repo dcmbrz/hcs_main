@@ -13,7 +13,6 @@ datasource db {
 enum Gender {
   MALE
   FEMALE
-  OTHER
 }
 
 enum JOBTYPE {
@@ -120,7 +119,7 @@ model Patient {
   last_name               String
   date_of_birth           DateTime
   gender                  Gender    
-  Phone_number            String    
+  phone                   String    
   email                   String    @unique
   marital_status          String
   address                 String
@@ -129,17 +128,17 @@ model Patient {
   // Emergency Contact
   emergency_contact_name  String
   emergency_contact_number String
-  relation                String
+  emergency_contact_relationship                String
   
   // Medical Information
-  blood_group             String?
+  blood_type              String?
   allergies               String?
-  medical_conditions      String?
+  existing_conditions      String?
   medical_history         String?
   
   // Insurance
   insurance_provider      String?
-  insurance_number        String?
+  insurance_policy_number        String?
   
   // Consents
   privacy_consent         Boolean   @default(false)
@@ -393,7 +392,7 @@ model Nurse {
   
   // Emergency Contact
   emergency_contact_name  String
-  emergency_contact_phone String
+  emergency_contact_number String
   
   // Relations
   shifts                  NurseShift[]
@@ -431,7 +430,7 @@ model Resident {
   // Medical Information
   blood_group             String?
   allergies               String?
-  medical_conditions      String
+  existing_conditions     String
   medical_history         String?
   current_medications     String?
   dietary_restrictions    String?
@@ -447,7 +446,7 @@ model Resident {
   
   // Emergency Contact
   emergency_contact_name  String
-  emergency_contact_phone String
+  emergency_contact_number String
   emergency_contact_relation String
   
   // Insurance & Financial

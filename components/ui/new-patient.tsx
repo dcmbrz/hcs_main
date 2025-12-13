@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import { Form } from "./form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Phone } from "lucide-react";
+//import { Phone } from "lucide-react";
 import { PatientSchema } from "@/lib/schema";
 import { z } from "zod";
 import { CustomInput } from "./custom-input";
@@ -35,33 +35,36 @@ export const NewPatient = ({ data, type }: DataProps) => {
     date_of_birth: data?.date_of_birth || "",
     clerkUserId: user.user?.id,
     email: user.user?.emailAddresses[0]?.emailAddress || "",
-    Phone_number: data?.Phone_number || "",
+    phone: data?.phone || "",
 }), [data, user.user]);
 
     const userid = user?.id;
-    const form = useForm<z.infer<typeof PatientSchema>>({
-        resolver: zodResolver(PatientSchema),
-        defaultValues: { 
-            ...userData,
-            address: data?.address || "",
-            date_of_birth: new Date(),
-            gender: "",
-            marital_status: "",
-            emergency_contact_name: "",
-            emergency_contact_phone: "",
-            emergency_contact_relationship: "",
-            blood_type: " ",
-            allergies: data?.allergies || "",
-            existing_conditions: "",
-            medical_history: "",
-            insurance_provider: "",
-            insurance_policy_number: "",
-            medical_consent: data?.medical_consent || false,
-            privacy_consent: data?.privacy_consent || false,
-            service_consent: data?.service_consent || false,
-             },
-    });
-
+   const form = useForm<z.infer<typeof PatientSchema>>({
+    resolver: zodResolver(PatientSchema),
+    defaultValues: { 
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "", 
+        date_of_birth: new Date(),
+        gender: "MALE",
+        marital_status: "",
+        address: "",
+        emergency_contact_name: "",
+        emergency_contact_number: "", 
+        emergency_contact_relationship: "",
+        blood_type: "",
+        allergies: "",
+        existing_conditions: "",
+        medical_history: "",
+        insurance_provider: "",
+        insurance_policy_number: "",
+        medical_consent: false,
+        privacy_consent: false,
+        service_consent: false,
+        img: "",
+    },
+});
         const onSubmit: SubmitHandler<z.infer<typeof PatientSchema>> = async (values) => {
         setLoading(true);
         
@@ -87,48 +90,35 @@ export const NewPatient = ({ data, type }: DataProps) => {
         }
     };
 
-    useEffect(() => {
-        if (type === "create") {
-            userData && form.reset({...userData});
-        } else if (type === "update") {
-            data && 
-                form.reset({ 
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    email: data.email,
-                    phone: data.Phone_number,
-                    date_of_birth: new Date(data.date_of_birth),
-                    gender: data.gender,
-                    marital_status: data.marital_status as
-                        | "Single"
-                        | "Married"
-                        | "Divorced"
-                        | "Widowed"
-                        | "Separated",
-                    address: data.address,
-                    emergency_contact_name: data.emergency_contact_name,
-                    emergency_contact_relationship: data.emergency_contact_relationship as
-                        | "Mother"
-                        | "Father"
-                        | "Sibling"
-                        | "Spouse"
-                        | "Friend"
-                        | "Other",
-                    emergency_contact_phone: data.emergency_contact_number,
-                    blood_type: data?.blood_type!,
-                    allergies: data?.allergies! || "",
-                    existing_conditions: data?.existing_conditions! || "",
-                    medical_history: data?.medical_history! || "",
-                    insurance_provider: data?.insurance_provider! || "",
-                    insurance_policy_number: data?.insurance_policy_number! || "",
-                    medical_consent: data?.medical_consent,
-                    privacy_consent: data?.privacy_consent,
-                    service_consent: data?.service_consent,
-                 });
-        }
-    },
-    [type, data]);
-
+   useEffect(() => {
+    if (type === "create" && userData) {
+        form.reset({...userData});
+    } else if (type === "update" && data) {
+        form.reset({ 
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            phone: data.phone, // ✅ Changed
+            date_of_birth: new Date(data.date_of_birth),
+            gender: data.gender,
+            marital_status: data.marital_status,
+            address: data.address,
+            emergency_contact_name: data.emergency_contact_name,
+            emergency_contact_relationship: data.emergency_contact_relationship,
+            emergency_contact_number: data.emergency_contact_number, // ✅ Changed
+            blood_type: data.blood_type || "",
+            allergies: data.allergies || "",
+            existing_conditions: data.existing_conditions || "",
+            medical_history: data.medical_history || "",
+            insurance_provider: data.insurance_provider || "",
+            insurance_policy_number: data.insurance_policy_number || "", // ✅ Changed
+            medical_consent: data.medical_consent || false,
+            privacy_consent: data.privacy_consent || false,
+            service_consent: data.service_consent || false,
+            img: data.img || "",
+        });
+    }
+}, [type, data, form, userData]);
 
 
     {/* Card Container Logic */}
@@ -200,7 +190,7 @@ export const NewPatient = ({ data, type }: DataProps) => {
                                 <CustomInput
                                     type="input"
                                     control={form.control}
-                                    name="Phone_number"
+                                    name="phone"
                                     label="Phone Number"
                                     placeholder="Contact number"
                                 />
@@ -245,7 +235,7 @@ export const NewPatient = ({ data, type }: DataProps) => {
                             <CustomInput
                                 type="input"
                                 control={form.control}
-                                name="emergency_contact_phone"
+                                name="emergency_contact_number"
                                 label="Emergency Contact Phone"
                                 placeholder="123-456-7890"
                             />

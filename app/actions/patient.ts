@@ -30,21 +30,21 @@ export async function createPatient(data: any, userId: string | undefined) {
             publicMetadata: { role: "patient" },
         });
 
-        // Create the patient record in the database
+               // Create the patient record in the database
         await db.patient.create({
             data: {
                 first_name: patientData.first_name,
                 last_name: patientData.last_name,
                 email: patientData.email,
-                Phone_number: patientData.Phone_number,
+                phone: patientData.phone, 
                 date_of_birth: patientData.date_of_birth,
                 gender: patientData.gender,
                 marital_status: patientData.marital_status,
                 address: patientData.address,
                 emergency_contact_name: patientData.emergency_contact_name,
                 emergency_contact_relationship: patientData.emergency_contact_relationship,
-                emergency_contact_number: patientData.emergency_contact_phone,
-                blood_type: patientData.blood_type,
+                emergency_contact_number: patientData.emergency_contact_number, 
+                blood_type: patientData.blood_type || null,
                 allergies: patientData.allergies || null,
                 existing_conditions: patientData.existing_conditions || null,
                 medical_history: patientData.medical_history || null,
@@ -53,7 +53,8 @@ export async function createPatient(data: any, userId: string | undefined) {
                 medical_consent: patientData.medical_consent,
                 privacy_consent: patientData.privacy_consent,
                 service_consent: patientData.service_consent,
-                clerkUserId: userId, // This links to the Clerk user
+                img: patientData.img || null,
+                clerkUserId: userId,
             },
         });
 
