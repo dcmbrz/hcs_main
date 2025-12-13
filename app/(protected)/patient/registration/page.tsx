@@ -1,5 +1,5 @@
 import { NewPatient } from "@/components/ui/new-patient";
-import { getPatientDataById } from "@/lib/queries";
+import { getPatientById } from "@/utils/services/patient";
 import { auth } from "@clerk/nextjs/server";
 import React from "react";
 
@@ -7,7 +7,10 @@ import React from "react";
 
 const Registration = async() => {
     const {userId} = await auth()
-    const {data} = await getPatientDataById(userId!)
+
+    const {data} = await getPatientById(userId!)
+    console.log("Patient Data:", data);
+
 
     return (
     <div className="py-6 px-3 flex justify-center">
